@@ -1,0 +1,5 @@
+rate: 44100
+threshold: 1000
+chunk_size: 4096
+audio_file: /var/ramdisk/sample.wav
+silent_duration: 20
