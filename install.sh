@@ -1,7 +1,7 @@
 #!/bin/sh
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install sox python python-pip
+sudo apt-get install sox python python-pip portaudio19-dev python-dev
 pip install -r requirements.txt
 
 sudo mkdir /mnt/ramdisk
