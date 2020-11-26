@@ -1,5 +1,5 @@
 rate: 44100
-threshold: 1000
+threshold: 1500
 chunk_size: 4096
 audio_file: /var/ramdisk/sample.wav
 silent_duration: 20

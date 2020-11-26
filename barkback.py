@@ -18,10 +18,12 @@ silent_duration = int(config.get('silent_duration', 30))
 
 audio_file = config.get('audio_file', '/var/ramdisk/sample.wav')
 
+
 def is_silent(snd_data):
     "Returns 'True' if below the 'silent' threshold"
     print(max(snd_data))
     return max(snd_data) < THRESHOLD
+
 
 def normalize(snd_data):
     "Average the volume out"
@@ -33,6 +35,7 @@ def normalize(snd_data):
         r.append(int(i*times))
     return r
 
+
 def trim(snd_data):
     "Trim the blank spots at the start and end"
     def _trim(snd_data):
@@ -40,7 +43,7 @@ def trim(snd_data):
         r = array('h')
 
         for i in snd_data:
-            if not snd_started and abs(i)>THRESHOLD:
+            if not snd_started and abs(i) > THRESHOLD:
                 snd_started = True
                 r.append(i)
 
@@ -57,6 +60,7 @@ def trim(snd_data):
     snd_data.reverse()
     return snd_data
 
+
 def add_silence(snd_data, seconds):
     "Add silence to the start and end of 'snd_data' of length 'seconds' (float)"
     silence = [0] * int(seconds * RATE)
@@ -64,6 +68,7 @@ def add_silence(snd_data, seconds):
     r.extend(snd_data)
     r.extend(silence)
     return r
+
 
 def record():
     """
@@ -77,8 +82,8 @@ def record():
     """
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT, channels=1, rate=RATE,
-        input=True, output=False,
-        frames_per_buffer=CHUNK_SIZE)
+                    input=True, output=False,
+                    frames_per_buffer=CHUNK_SIZE)
 
     num_silent = 0
     snd_started = False
@@ -90,7 +95,6 @@ def record():
         snd_data = array('h', stream.read(CHUNK_SIZE))
         if byteorder == 'big':
             snd_data.byteswap()
-        r.extend(snd_data)
 
         silent = is_silent(snd_data)
 
@@ -99,8 +103,14 @@ def record():
         elif not silent and not snd_started:
             snd_started = True
 
+        if not silent and num_silent > 0:
+            num_silent = 0
+
         if snd_started and num_silent > silent_duration:
             break
+
+        if snd_started:
+            r.extend(snd_data)
 
     sample_width = p.get_sample_size(FORMAT)
     stream.stop_stream()
@@ -109,11 +119,11 @@ def record():
 
     r = normalize(r)
     r = trim(r)
-    # r = add_silence(r, 0.5)
+    r = add_silence(r, 0.5)
     return sample_width, r
 
 
-def play_sound(sfile):
+def play_sound(audio_file):
     subprocess.call(['play', audio_file])
 
 
@@ -128,6 +138,7 @@ def record_to_file(path):
     wf.setframerate(RATE)
     wf.writeframes(data)
     wf.close()
+
 
 if __name__ == '__main__':
     while True:
